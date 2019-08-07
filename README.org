@@ -1,0 +1,26 @@
+* Overview
+We keep reinventing the wheel on how to set completion backends
+locally. =compdef= does this for you for both CAPF and company, with
+some auto-magic thrown in for convenience.  =compdef= is intentionally
+stupid. I've seen some really powerful solutions to this problem, but
+they all seem to assume a certain approach to configuring completions
+and are thus usually embedded in a starter kit like Doom Emacs,
+Spacemacs... =compdef= isn't that clever. It just works.
+
+* Examples
+** CAPF
+#+begin_src emacs-lisp :tangle yes
+  (compdef
+   :modes '(emacs-lisp-mode lisp-interaction-mode ielm-mode)
+   :backends '(helm-lisp-completion-or-file-name-at-point
+               ggtags-completion-at-point
+               t))
+#+end_src
+
+** Company
+#+begin_src emacs-lisp :tangle yes
+  (compdef
+   :modes 'lua-mode
+   :backends '(company-lua company-capf)
+   :company t)
+#+end_src
