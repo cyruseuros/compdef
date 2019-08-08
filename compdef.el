@@ -27,7 +27,7 @@
 ;;; Commentary:
 ;; A stupid completion definer.
 
-;; We keep reinventing the wheel on how to set completion capf-funs
+;; We keep reinventing the wheel on how to set completion capf
 ;; locally.  `compdef' does this for you for both CAPF and company,
 ;; with some auto-magic thrown in for convenience.  `compdef' is
 ;; intentionally stupid.  I've seen some really powerful solutions to
@@ -37,26 +37,32 @@
 ;; just works.
 
 ;;; Code:
-(cl-defun compdef (&key modes hooks
-                        capf-funs company-funs)
-  "Set completion BACKENDS for MODES using HOOKS.
-If COMPANY is t, use set `company-funs', else set
-`completion-at-point-functions'.  If HOOKS are nil, infer them from
-MODES. MODES and HOOKS can be quoted lists as well as atoms."
-  (let* ((capf-funs (if (listp capf-funs) capf-funs (list capf-funs)))
-         (company-funs (if (listp capf-funs) capf-funs (list capf-funs)))
+(cl-defun compdef (&key modes hooks capf company)
+  "Set local completion backends for MODES using HOOKS.
+Set `company-backends' to COMPANY if not nil. Set
+`completion-at-point-functions' to CAPF if not nil.  If HOOKS are
+nil, infer them from MODES.  MODES and HOOKS can be quoted lists
+as well as atoms."
+  (let* ((capf (if (listp capf) capf (list capf)))
+         (company (if (listp company) company (list company)))
          (modes (if (listp modes) modes (list modes)))
          (hooks (or hooks (cl-loop for mode in modes collect
-                             (intern (concat (symbol-name mode) "-hook"))))))
-    (cl-loop for hook in hooks do
-             (add-hook hook
-                       (lambda ()
-                         (when capf-funs
-                           (set (make-local-variable 'completion-at-point-functions)
-                                capf-funs))
-                         (when company-funs
-                           (set (make-local-variable 'company-funs)
-                                company-funs)))))))
+                                   (intern (concat (symbol-name mode)
+                                                   "-hook"))))))
+    (cl-loop for hook in hooks
+             for mode in modes
+             do (add-hook hook
+                          (defalias (intern (concat "compdef-" (symbol-name mode)))
+                            (lambda ()
+                              (when capf
+                                (set (make-local-variable
+                                      'completion-at-point-functions) capf))
+                              (when company
+                                (set (make-local-variable
+                                      'company-backends) company)))
+                            (format
+                             "Set completion backends for %s. Added by `compdef'."
+                             (symbol-name mode)))))))
 
 (provide 'compdef)
 ;;; compdef.el ends here

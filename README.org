@@ -10,17 +10,18 @@ Spacemacs... =compdef= isn't that clever. It just works.
 * Examples
 ** CAPF
 #+begin_src emacs-lisp :tangle yes
-  (compdef
-   :modes '(emacs-lisp-mode lisp-interaction-mode ielm-mode)
-   :backends '(helm-lisp-completion-or-file-name-at-point
-               ggtags-completion-at-point
-               t))
+    (compdef
+     :modes '(emacs-lisp-mode lisp-interaction-mode ielm-mode)
+     :capf '(helm-lisp-completion-or-file-name-at-point
+             ggtags-completion-at-point
+             t))
 #+end_src
 
 ** Company
 #+begin_src emacs-lisp :tangle yes
+  ;; Add org keyword completions.
   (compdef
-   :modes 'lua-mode
-   :backends '(company-lua company-capf)
-   :company t)
+   :modes #'org-mode
+   :company '(company-dabbrev company-capf)
+   :capf #'pcomplete-completions-at-point)
 #+end_src
