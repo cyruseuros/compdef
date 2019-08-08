@@ -60,7 +60,7 @@ length as MODES."
     (cl-loop for hook in hooks
              for mode in modes
              do (add-hook hook
-                          (defalias (intern (concat "compdef-" (symbol-name mode)))
+                          (defalias (intern (format "compdef-%s-fun" (symbol-name mode)))
                             (lambda ()
                               (when capf
                                 (set (make-local-variable
