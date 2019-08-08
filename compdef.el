@@ -33,7 +33,7 @@
 ;; intentionally stupid.  I've seen some really powerful solutions to
 ;; this problem, but they all seem to assume a certain approach to
 ;; configuring completions and are thus usually embedded in a starter
-;; kit like Doom Emacs, Spacemacs...  `compdef' isn't that clever. It
+;; kit like Doom Emacs, Spacemacs...  `compdef' isn't that clever.  It
 ;; just works.
 
 ;;; Code:
@@ -46,8 +46,9 @@
   "Set local completion backends for MODES using HOOKS.
 Set `company-backends' to COMPANY if not nil. Set
 `completion-at-point-functions' to CAPF if not nil.  If HOOKS are
-nil, infer them from MODES.  MODES and HOOKS can be quoted lists
-as well as atoms."
+nil, infer them from MODES.  All arguments can be quoted lists as
+well as atoms.  If HOOKS is not nil, it must be of the same
+length as MODES."
   (let* ((capf (compdef--enlist capf))
          (company (compdef--enlist company))
          (modes (compdef--enlist modes))
