@@ -9,32 +9,34 @@
 ;; Keywords: convenience
 ;; Package-Requires: ((emacs "24.4"))
 
-;; This program is free software: you can redistribute it and/or modify it under
-;; the terms of the GNU General Public License as published by the Free Software
-;; Foundation, either version 3 of the License, or (at your option) any later
-;; version.
+;; This program is free software: you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation, either version 3 of the
+;; License, or (at your option) any later version.
 
-;; This program is distributed in the hope that it will be useful, but WITHOUT
-;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-;; FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-;; details.
+;; This program is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+;; General Public License for more details.
 
-;; You should have received a copy of the GNU General Public License along with
-;; this program. If not, see <http://www.gnu.org/licenses/>.
+;; You should have received a copy of the GNU General Public License
+;; along with this program. If not, see
+;; <http://www.gnu.org/licenses/>.
 
 ;; This file is not part of Emacs.
 
 ;;; Commentary:
 ;; A stupid completion definer.
 
-;; We keep reinventing the wheel on how to set completion capf
-;; locally.  `compdef' does this for you for both CAPF and company,
-;; with some auto-magic thrown in for convenience.  `compdef' is
-;; intentionally stupid.  I've seen some really powerful solutions to
-;; this problem, but they all seem to assume a certain approach to
-;; configuring completions and are thus usually embedded in a starter
-;; kit like Doom Emacs, Spacemacs...  `compdef' isn't that clever.  It
-;; just works.
+;; We keep reinventing the wheel on how to set local completion
+;; backends.  `compdef' does this for both CAPF and company
+;; simultaneously (in case `company-capf' needs tweaking), with some
+;; auto-magic thrown in for convenience.  `compdef' is intentionally
+;; stupid.  I've seen some really powerful solutions to this problem,
+;; but they all seem to assume a certain approach to configuring
+;; completions and are thus usually embedded in a starter kit like
+;; Doom Emacs, Spacemacs... `compdef' isn't that clever. It just
+;; works.
 
 ;;; Code:
 (defun compdef--enlist (exp)
@@ -47,7 +49,7 @@
 Set `company-backends' to COMPANY if not nil. Set
 `completion-at-point-functions' to CAPF if not nil.  If HOOKS are
 nil, infer them from MODES.  All arguments can be quoted lists as
-well as atoms.  If HOOKS is not nil, it must be of the same
+well as atoms.  If HOOKS are not nil, they must be of the same
 length as MODES."
   (let* ((capf (compdef--enlist capf))
          (company (compdef--enlist company))
