@@ -37,15 +37,20 @@
 ;; just works.
 
 ;;; Code:
+(defun compdef--enlist (exp)
+  "Return EXP wrapped in a list, or as-is if already a list."
+  (declare (pure t) (side-effect-free t))
+  (if (listp exp) exp (list exp)))
+
 (cl-defun compdef (&key modes hooks capf company)
   "Set local completion backends for MODES using HOOKS.
 Set `company-backends' to COMPANY if not nil. Set
 `completion-at-point-functions' to CAPF if not nil.  If HOOKS are
 nil, infer them from MODES.  MODES and HOOKS can be quoted lists
 as well as atoms."
-  (let* ((capf (if (listp capf) capf (list capf)))
-         (company (if (listp company) company (list company)))
-         (modes (if (listp modes) modes (list modes)))
+  (let* ((capf (compdef--enlist capf))
+         (company (compdef--enlist company))
+         (modes (compdef--enlist modes))
          (hooks (or hooks (cl-loop for mode in modes collect
                                    (intern (concat (symbol-name mode)
                                                    "-hook"))))))
