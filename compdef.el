@@ -21,7 +21,7 @@
 
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program. If not, see
-;; <http://www.gnu.org/licenses/>.
+;; <https://www.gnu.org/licenses/>.
 
 ;; This file is not part of Emacs.
 
@@ -39,6 +39,8 @@
 ;; works.
 
 ;;; Code:
+(defvar company-backends)
+
 (defun compdef--enlist (exp)
   "Return EXP wrapped in a list, or as-is if already a list."
   (declare (pure t) (side-effect-free t))
@@ -60,14 +62,11 @@ length as MODES."
     (cl-loop for hook in hooks
              for mode in modes
              do (add-hook hook
-                          (defalias (intern (format "compdef-%s-fun" (symbol-name mode)))
+                          (defalias
+                            (intern (format "compdef-%s-fun" (symbol-name mode)))
                             (lambda ()
-                              (when capf
-                                (set (make-local-variable
-                                      'completion-at-point-functions) capf))
-                              (when company
-                                (set (make-local-variable
-                                      'company-backends) company)))
+                              (when capf (setq-local completion-at-point-functions capf))
+                              (when company (setq-local company-backends company)))
                             (format
                              "Set completion backends for %s. Added by `compdef'."
                              (symbol-name mode)))))))
