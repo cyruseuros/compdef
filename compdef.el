@@ -39,6 +39,8 @@
 ;; works.
 
 ;;; Code:
+(require 'derived)
+
 (defvar company-backends)
 
 (defun compdef--enlist (exp)
@@ -56,9 +58,9 @@ length as MODES."
   (let* ((capf (compdef--enlist capf))
          (company (compdef--enlist company))
          (modes (compdef--enlist modes))
-         (hooks (or hooks (cl-loop for mode in modes collect
-                                   (intern (concat (symbol-name mode)
-                                                   "-hook"))))))
+         (hooks (or hooks
+                    (cl-loop for mode in modes collect
+                             (derived-mode-hook-name mode)))))
     (cl-loop for hook in hooks
              for mode in modes
              do (add-hook hook
