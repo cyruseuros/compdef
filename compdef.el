@@ -39,6 +39,7 @@
 ;; works.
 
 ;;; Code:
+(require 'cl-lib)
 (require 'derived)
 
 (defvar company-backends)
@@ -62,16 +63,15 @@ length as MODES."
                     (cl-loop for mode in modes collect
                              (derived-mode-hook-name mode)))))
     (cl-loop for hook in hooks
-             for mode in modes
              do (add-hook hook
                           (defalias
-                            (intern (format "compdef-%s-fun" (symbol-name mode)))
+                            (intern (format "compdef-%s-fun" (symbol-name hook)))
                             (lambda ()
                               (when capf (setq-local completion-at-point-functions capf))
                               (when company (setq-local company-backends company)))
                             (format
-                             "Set completion backends for %s. Added by `compdef'."
-                             (symbol-name mode)))))))
+                             "`compdef' for %s."
+                             (symbol-name hook)))))))
 
 (provide 'compdef)
 ;;; compdef.el ends here
