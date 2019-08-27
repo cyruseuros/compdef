@@ -49,6 +49,7 @@
   (declare (pure t) (side-effect-free t))
   (if (listp exp) exp (list exp)))
 
+;;;###autoload
 (cl-defun compdef (&key modes hooks capf company)
   "Set local completion backends for MODES using HOOKS.
 Set `company-backends' to COMPANY if not nil. Set
