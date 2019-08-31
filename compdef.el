@@ -5,7 +5,7 @@
 ;; Author: Uros Perisic
 ;; URL: https://gitlab.com/jjzmajic/compdef
 ;;
-;; Version: 0.1
+;; Version: 0.2
 ;; Keywords: convenience
 ;; Package-Requires: ((emacs "24.4"))
 
