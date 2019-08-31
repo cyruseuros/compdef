@@ -42,6 +42,10 @@
 (require 'cl-lib)
 (require 'derived)
 
+(defvar compdef--use-package-keywords
+  '(:compdef :company :capf)
+  "Kywords `compdef' adds to `use-package'.")
+
 (defvar company-backends)
 
 (defun compdef--enlist (exp)
@@ -66,17 +70,60 @@ can be quoted lists as well as atoms."
          (company (compdef--enlist company))
          (modes (compdef--enlist modes)))
     (cl-loop for mode in modes
-             as hook (if (compdef--hook-p mode) mode
-                       (derived-mode-hook-name mode))
+             as hook = (if (compdef--hook-p mode) mode
+                         (derived-mode-hook-name mode))
              do (add-hook hook
-                 (defalias
-                   (intern (format "compdef-%s-fun" (symbol-name hook)))
-                   (lambda ()
-                     (when capf (setq-local completion-at-point-functions capf))
-                     (when company (setq-local company-backends company)))
-                   (format
-                    "`compdef' for %s."
-                    (symbol-name hook)))))))
+                          (defalias
+                            (intern (format "compdef-%s-fun" (symbol-name hook)))
+                            (lambda ()
+                              (when capf (setq-local completion-at-point-functions capf))
+                              (when company (setq-local company-backends company)))
+                            (format
+                             "`compdef' for %s."
+                             (symbol-name hook)))))))
+
+(with-eval-after-load 'use-package-core
+  (declare-function use-package-concat "use-package")
+  (declare-function use-package-process-keywords "use-package")
+  (defvar use-package-keywords)
+  (defvar use-package-deferring-keywords)
+
+  (dolist (keyword compdef--use-package-keywords)
+    (push keyword use-package-deferring-keywords)
+    (setq use-package-keywords
+          (use-package-list-insert keyword use-package-keywords :init)))
+
+  (defalias 'use-package-normalize/:compdef #'use-package-normalize-symlist)
+  (defalias 'use-package-normalize/:company #'use-package-normalize-symlist)
+  (defalias 'use-package-normalize/:capf #'use-package-normalize-symlist)
+
+  (defun compdef--plist-multi-delete (plist properties)
+    "Delete PROPERTIES from PLIST."
+    (if properties
+        (compdef--plist-multi-delete
+         (use-package-plist-delete plist (car properties))
+         (cdr properties))
+      plist))
+
+  (defun use-package-handler/:compdef (name keyword args rest state)
+    (let ((modes (or (if (eq keyword :compdef)
+                         args
+                       (plist-get rest :compdef))
+                     name))
+          (company (plist-get rest :company))
+          (capf (plist-get rest :capf)))
+      (use-package-concat
+       (use-package-process-keywords name
+         (compdef--plist-multi-delete
+          rest compdef--use-package-keywords)
+         state)
+       `((compdef
+          :modes ',modes
+          :company ',company
+          :capf ',capf)))))
+
+  (defalias 'use-package-handler/:company #'use-package-handler/:compdef)
+  (defalias 'use-package-handler/:capf #'use-package-handler/:compdef))
 
 (provide 'compdef)
 ;;; compdef.el ends here
