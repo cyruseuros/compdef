@@ -49,30 +49,34 @@
   (declare (pure t) (side-effect-free t))
   (if (listp exp) exp (list exp)))
 
+(defun compdef--hook-p (symbol)
+  "Check if SYMBOL is a hook."
+  (or
+   (string-suffix-p "-hook" (symbol-name symbol))
+   (string-suffix-p "-functions" (symbol-name symbol))))
+
 ;;;###autoload
-(cl-defun compdef (&key modes hooks capf company)
-  "Set local completion backends for MODES using HOOKS.
-Set `company-backends' to COMPANY if not nil. Set
-`completion-at-point-functions' to CAPF if not nil.  If HOOKS are
-nil, infer them from MODES.  All arguments can be quoted lists as
-well as atoms.  If HOOKS are not nil, they must be of the same
-length as MODES."
+(cl-defun compdef (&key modes capf company)
+  "Set local completion backends for MODES.
+Infer hooks for MODES. If actual hooks are passed use them
+directly. Set `company-backends' to COMPANY if not nil. Set
+`completion-at-point-functions' to CAPF if not nil. All arguments
+can be quoted lists as well as atoms."
   (let* ((capf (compdef--enlist capf))
          (company (compdef--enlist company))
-         (modes (compdef--enlist modes))
-         (hooks (or hooks
-                    (cl-loop for mode in modes collect
-                             (derived-mode-hook-name mode)))))
-    (cl-loop for hook in hooks
+         (modes (compdef--enlist modes)))
+    (cl-loop for mode in modes
+             as hook (if (compdef--hook-p mode) mode
+                       (derived-mode-hook-name mode))
              do (add-hook hook
-                          (defalias
-                            (intern (format "compdef-%s-fun" (symbol-name hook)))
-                            (lambda ()
-                              (when capf (setq-local completion-at-point-functions capf))
-                              (when company (setq-local company-backends company)))
-                            (format
-                             "`compdef' for %s."
-                             (symbol-name hook)))))))
+                 (defalias
+                   (intern (format "compdef-%s-fun" (symbol-name hook)))
+                   (lambda ()
+                     (when capf (setq-local completion-at-point-functions capf))
+                     (when company (setq-local company-backends company)))
+                   (format
+                    "`compdef' for %s."
+                    (symbol-name hook)))))))
 
 (provide 'compdef)
 ;;; compdef.el ends here
