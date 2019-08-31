@@ -26,3 +26,17 @@ isn't that clever. It just works.
    :company '(company-dabbrev company-capf)
    :capf #'pcomplete-completions-at-point)
 #+end_src
+
+** use-package Keywords
+#+begin_src emacs-lisp :tangle yes
+;; infer from package name
+(use-package go-mode
+  :capf go-complete
+  :company company-go)
+
+;; override
+(use-package go-mode
+  :compdef go-mode my-custom-hook my-custom-mode
+  :capf go-complete
+  :company company-go)
+#+end_src
