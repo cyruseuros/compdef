@@ -77,9 +77,9 @@ can be quoted lists as well as atoms."
          (when company (setq-local company-backends company)))))))
 
 (with-eval-after-load 'use-package-core
-  (declare-function use-package-concat "use-package")
-  (declare-function use-package-process-keywords "use-package")
-  (declare-function use-package-normalize-symlist "use-package")
+  (declare-function use-package-concat "ext:use-package-core")
+  (declare-function use-package-process-keywords "ext:use-package-core")
+  (declare-function use-package-normalize-symlist "ext:use-package-core")
   (defvar use-package-keywords)
 
   (defun use-package-handler/:compdef (name _keyword args rest state)
