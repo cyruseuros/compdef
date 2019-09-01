@@ -43,7 +43,7 @@
 (require 'derived)
 
 (defvar compdef--use-package-keywords
-  '(:compdef :company :capf)
+  '(:capf :company :compdef)
   "Kywords `compdef' adds to `use-package'.")
 
 (defvar company-backends)
@@ -105,25 +105,29 @@ can be quoted lists as well as atoms."
          (cdr properties))
       plist))
 
-  (defun use-package-handler/:compdef (name keyword args rest state)
-    (let ((modes (or (if (eq keyword :compdef)
-                         args
-                       (plist-get rest :compdef))
-                     name))
-          (company (plist-get rest :company))
-          (capf (plist-get rest :capf)))
+  (defun compdef--use-package-get (current keyword args rest)
+    "Return value of KEYWORD from REST.
+Return ARGS if KEYWORD is CURRENT."
+    (or (plist-get rest keyword)
+        (when (eq keyword current)
+          args)))
+
+  (defun use-package-handler/:capf (name keyword args rest state)
+    (let ((modes (or (plist-get rest :compdef) name))
+          (capf (compdef--use-package-get keyword ':capf args rest))
+          (company (compdef--use-package-get keyword ':company args rest)))
       (use-package-concat
        (use-package-process-keywords name
          (compdef--plist-multi-delete
-          rest compdef--use-package-keywords)
+          rest (cdr compdef--use-package-keywords))
          state)
        `((compdef
           :modes ',modes
           :company ',company
           :capf ',capf)))))
 
-  (defalias 'use-package-handler/:company #'use-package-handler/:compdef)
-  (defalias 'use-package-handler/:capf #'use-package-handler/:compdef))
+  (defalias 'use-package-handler/:compdef #'ignore)
+  (defalias 'use-package-handler/:company #'use-package-handler/:capf))
 
 (provide 'compdef)
 ;;; compdef.el ends here
