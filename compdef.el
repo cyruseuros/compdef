@@ -119,7 +119,7 @@ Return ARGS if KEYWORD is CURRENT."
       (use-package-concat
        (use-package-process-keywords name
          (compdef--plist-multi-delete
-          rest (cdr compdef--use-package-keywords))
+          rest compdef--use-package-keywords)
          state)
        `((compdef
           :modes ',modes
