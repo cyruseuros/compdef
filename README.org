@@ -1,12 +1,27 @@
 * Overview
-We keep reinventing the wheel on how to set local completion
-backends. =compdef= does this for both CAPF and company simultaneously
-(in case =company-capf= needs tweaking), with some auto-magic thrown
-in for convenience.  =compdef= is intentionally stupid. I've seen some
-really powerful solutions to this problem, but they all seem to assume
-a certain approach to configuring completions and are thus usually
-embedded in a starter kit like Doom Emacs, Spacemacs... =compdef=
-isn't that clever. It just works.
+We keep reinventing the wheel on how to set local completion backends. Even the
+official =company= documentation (in this case =company-yasnippet=) recommends
+ugly workarounds like [[https://github.com/company-mode/company-mode/blob/master/company-yasnippet.el#L111][this]]:
+
+#+begin_src emacs-lisp :tangle yes
+  (add-hook 'js-mode-hook
+            (lambda ()
+              (set (make-local-variable 'company-backends)
+                   '((company-dabbrev-code company-yasnippet)))))
+#+end_src
+
+
+=compdef= sets local completion backends for both CAPF and company
+simultaneously, with some auto-magic thrown in for convenience (setting backends
+for multiple modes at the same time, mixing-and-matching modes and hooks, etc.).
+=compdef= is intentionally stupid, simply setting the variables to what you tell
+it to, and letting CAPF and =company= handle the finesse of interpreting them.
+I've seen some really powerful solutions to this problem, but they all seem to
+assume a certain approach to configuring completions and are thus usually
+embedded in a starter kit like Doom Emacs, Spacemacs... =compdef= isn't that
+clever. It just works.
+
+... Did I mention the =use-package= keywords?
 
 * Examples
 ** CAPF
@@ -18,7 +33,7 @@ isn't that clever. It just works.
              t))
 #+end_src
 
-** Company
+** =company=
 #+begin_src emacs-lisp :tangle yes
   ;; Add org keyword completions.
   (compdef
@@ -27,16 +42,23 @@ isn't that clever. It just works.
    :capf #'pcomplete-completions-at-point)
 #+end_src
 
-** use-package Keywords
+** =use-package=
 #+begin_src emacs-lisp :tangle yes
-;; infer from package name
+;; infer modes/hooks from package name
 (use-package go-mode
   :capf go-complete
   :company company-go)
 
 ;; override
 (use-package go-mode
+  ;; mix-and-match hooks and modes freely
   :compdef go-mode my-custom-hook my-custom-mode
+  :capf go-complete
+  :company company-go)
+
+;; same as above
+(use-package go-mode
+  :compdef (go-mode my-custom-hook my-custom-mode)
   :capf go-complete
   :company company-go)
 #+end_src
