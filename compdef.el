@@ -126,8 +126,12 @@ Return ARGS if KEYWORD is CURRENT."
           :company ',company
           :capf ',capf)))))
 
-  (defalias 'use-package-handler/:compdef #'ignore)
-  (defalias 'use-package-handler/:company #'use-package-handler/:capf))
+  (defalias 'use-package-handler/:company #'use-package-handler/:capf)
+
+  ;; Don't do anything. This keyword is never used alone, but if it is, it
+  ;; shouldn't break use-package.
+  (defun use-package-handler/:compdef (name _keyword _args rest state)
+    (use-package-process-keywords name rest state)))
 
 (provide 'compdef)
 ;;; compdef.el ends here
