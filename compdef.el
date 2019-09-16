@@ -65,9 +65,9 @@ Infer hooks for MODES. If actual hooks are passed use them
 directly. Set `company-backends' to COMPANY if not nil. Set
 `completion-at-point-functions' to CAPF if not nil. All arguments
 can be quoted lists as well as atoms."
-  (let* ((capf (compdef--enlist capf))
-         (company (compdef--enlist company))
-         (modes (compdef--enlist modes)))
+  (let ((capf (compdef--enlist capf))
+        (company (compdef--enlist company))
+        (modes (compdef--enlist modes)))
     (dolist (mode modes)
       (add-hook
        (if (compdef--hook-p mode) mode
