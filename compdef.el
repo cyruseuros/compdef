@@ -97,21 +97,15 @@ can be quoted lists as well as atoms."
     (use-package-process-keywords name rest
       (plist-put state :compdef args)))
 
-  ;; NOTE: A macro for 2 functions is overkill. If new keyowrds are ever added, make
-  ;; one, but leave as-is for now.
-  (defun use-package-handler/:capf (name _keyword args rest state)
+  (defun compdef--use-package-handler (name keyword args rest state)
     (use-package-concat
      (use-package-process-keywords name rest state)
      `((compdef
         :modes ',(or (plist-get state :compdef) name)
-        :capf ',args))))
+        ,keyword ',args))))
 
-  (defun use-package-handler/:company (name _keyword args rest state)
-    (use-package-concat
-     (use-package-process-keywords name rest state)
-     `((compdef
-        :modes ',(or (plist-get state :compdef) name)
-        :company ',args)))))
+  (defalias 'use-package-handler/:capf #'compdef--use-package-handler)
+  (defalias 'use-package-handler/:company #'compdef--use-package-handler))
 
 (provide 'compdef)
 ;;; compdef.el ends here
