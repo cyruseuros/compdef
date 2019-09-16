@@ -44,7 +44,7 @@
 
 (defvar compdef--use-package-keywords
   '(:compdef :capf :company)
-  "Kywords `compdef' adds to `use-package'.")
+  "Keywords `compdef' adds to `use-package'.")
 
 (defvar company-backends)
 
