@@ -1,4 +1,50 @@
 * Overview
+Paraphrased from [[https://www.reddit.com/r/emacs/comments/cy6hrq/the_stupid_completion_definer_is_back_a_little/eyqihl3?utm_source=share&utm_medium=web2x][these]] [[https://www.reddit.com/r/emacs/comments/cn25sj/a_stupid_completion_definer_is_it_even_worth/ew9wnfy?utm_source=share&utm_medium=web2x][two]] reddit posts:
+
+In buffer completion in Emacs is handled via the =completion-at-point= command
+by default. It gathers the completion data from =completion-at-point-functions=.
+
+[[https://github.com/company-mode/company-mode][Company]] --- a popular external package with similar functonality --- uses
+=company-backends= to configure sources for completion data. Because company is
+designed to work with =completion-at-point-functions= you can make use of it by
+adding the =company-capf= backend to =company-backends=.
+
+But, company dumps all of your completion backends into a single global value of
+=company-backends=. Then it searches through them until one works out for your
+current mode. Sometimes this works, sometimes it doesn't (there is often a
+conflict between backends, or there are too many active backends for snappy
+feedback). =completion-at-point= does the same with =completion-at-point
+functons=. =compdef= sets backends as a local variable for that specific mode,
+so you're always pinging the right ones in the right order.
+
+So by running the following:
+
+#+begin_src emacs-lisp :tangle yes
+(compdef
+ :modes #'org-mode
+ :company '(company-dabbrev company-capf)
+ :capf #'pcomplete-completions-at-point)
+#+end_src
+
+You set =company-backends= and =completion-at-point-functions= buffer locally
+for =org-mode= buffers (the global values might still get used, if the buffer
+local ones don't make the completion gathering process stop).
+
+You can now use =completion-at-point= command in =org-mode=, and
+=pcomplete-completions-at-point= will be used to get completion candidates. This
+works because =pcomplete= is already setup correctly for =org-mode=, and
+=pcomplete-completions-at-point= is pcomplete's compatabilty interface for
+=completion-at-point-functions=.
+
+If you invoke =company-complete= (manually or via the timer) company uses
+=company-dabbrev= and =company-capf= as backends. The latter uses uses whatever
+is configured as =completion-at-point-functions= which is
+=pcomplete-completions-at-point= in this example.
+
+All of this will work without any interference from external completion
+configurations.
+
+* Motivation
 We keep reinventing the wheel on how to set local completion backends. Even the
 official =company= documentation (in this case =company-yasnippet=) recommends
 ugly workarounds like [[https://github.com/company-mode/company-mode/blob/master/company-yasnippet.el#L111][this]]:
