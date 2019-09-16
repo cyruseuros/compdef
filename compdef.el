@@ -43,7 +43,7 @@
 (require 'derived)
 
 (defvar compdef--use-package-keywords
-  '(:capf :company :compdef)
+  '(:compdef :capf :company)
   "Kywords `compdef' adds to `use-package'.")
 
 (defvar company-backends)
@@ -72,15 +72,11 @@ can be quoted lists as well as atoms."
     (cl-loop for mode in modes
              as hook = (if (compdef--hook-p mode) mode
                          (derived-mode-hook-name mode))
-             do (add-hook hook
-                          (defalias
-                            (intern (format "compdef-%s-fun" (symbol-name hook)))
-                            (lambda ()
-                              (when capf (setq-local completion-at-point-functions capf))
-                              (when company (setq-local company-backends company)))
-                            (format
-                             "`compdef' for %s."
-                             (symbol-name hook)))))))
+             do (add-hook
+                 hook
+                 (lambda ()
+                   (when capf (setq-local completion-at-point-functions capf))
+                   (when company (setq-local company-backends company)))))))
 
 (with-eval-after-load 'use-package-core
   (declare-function use-package-concat "use-package")
@@ -97,41 +93,26 @@ can be quoted lists as well as atoms."
   (defalias 'use-package-normalize/:company #'use-package-normalize-symlist)
   (defalias 'use-package-normalize/:capf #'use-package-normalize-symlist)
 
-  (defun compdef--plist-multi-delete (plist properties)
-    "Delete PROPERTIES from PLIST."
-    (if properties
-        (compdef--plist-multi-delete
-         (use-package-plist-delete plist (car properties))
-         (cdr properties))
-      plist))
+  (defun use-package-handler/:compdef (name _keyword args rest state)
+    (use-package-process-keywords name rest
+      (plist-put state :compdef args)))
 
-  (defun compdef--use-package-get (current keyword args rest)
-    "Return value of KEYWORD from REST.
-Return ARGS if KEYWORD is CURRENT."
-    (or (plist-get rest keyword)
-        (when (eq keyword current)
-          args)))
+  (defun compdef--get-use-package-modes (state name)
+    (or (plist-get state :compdef) name))
 
-  (defun use-package-handler/:capf (name keyword args rest state)
-    (let ((modes (or (plist-get rest :compdef) name))
-          (capf (compdef--use-package-get keyword ':capf args rest))
-          (company (compdef--use-package-get keyword ':company args rest)))
-      (use-package-concat
-       (use-package-process-keywords name
-         (compdef--plist-multi-delete
-          rest compdef--use-package-keywords)
-         state)
-       `((compdef
-          :modes ',modes
-          :company ',company
-          :capf ',capf)))))
+  (defun use-package-handler/:capf (name _keyword args rest state)
+    (use-package-concat
+     (use-package-process-keywords name rest state)
+     `((compdef
+        :modes ',(compdef--get-use-package-modes state name)
+        :capf ',args))))
 
-  (defalias 'use-package-handler/:company #'use-package-handler/:capf)
-
-  ;; Don't do anything. This keyword is never used alone, but if it is, it
-  ;; shouldn't break use-package.
-  (defun use-package-handler/:compdef (name _keyword _args rest state)
-    (use-package-process-keywords name rest state)))
+  (defun use-package-handler/:company (name _keyword args rest state)
+    (use-package-concat
+     (use-package-process-keywords name rest state)
+     `((compdef
+        :modes ',(compdef--get-use-package-modes state name)
+        :company ',args)))))
 
 (provide 'compdef)
 ;;; compdef.el ends here
