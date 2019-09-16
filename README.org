@@ -1,3 +1,7 @@
+[[compdef.png]]
+
+A stupid Emacs completion definer.
+
 * Overview
 Paraphrased from [[https://www.reddit.com/r/emacs/comments/cy6hrq/the_stupid_completion_definer_is_back_a_little/eyqihl3?utm_source=share&utm_medium=web2x][these]] [[https://www.reddit.com/r/emacs/comments/cn25sj/a_stupid_completion_definer_is_it_even_worth/ew9wnfy?utm_source=share&utm_medium=web2x][two]] reddit posts:
 
