@@ -81,13 +81,13 @@ can be quoted lists as well as atoms."
 (with-eval-after-load 'use-package-core
   (declare-function use-package-concat "use-package")
   (declare-function use-package-process-keywords "use-package")
+  (declare-function use-package-normalize-symlist "use-package")
   (defvar use-package-keywords)
-  (defvar use-package-deferring-keywords)
 
   (dolist (keyword compdef--use-package-keywords)
-    (push keyword use-package-deferring-keywords)
     (setq use-package-keywords
-          (use-package-list-insert keyword use-package-keywords :init)))
+          (use-package-list-insert
+           keyword use-package-keywords :init)))
 
   (defalias 'use-package-normalize/:compdef #'use-package-normalize-symlist)
   (defalias 'use-package-normalize/:company #'use-package-normalize-symlist)
