@@ -41,12 +41,11 @@
 ;;; Code:
 (require 'cl-lib)
 (require 'derived)
+(defvar company-backends)
 
 (defvar compdef--use-package-keywords
   '(:compdef :capf :company)
   "Keywords `compdef' adds to `use-package'.")
-
-(defvar company-backends)
 
 (defun compdef--enlist (exp)
   "Return EXP wrapped in a list, or as-is if already a list."
@@ -69,14 +68,13 @@ can be quoted lists as well as atoms."
   (let* ((capf (compdef--enlist capf))
          (company (compdef--enlist company))
          (modes (compdef--enlist modes)))
-    (cl-loop for mode in modes
-             as hook = (if (compdef--hook-p mode) mode
-                         (derived-mode-hook-name mode))
-             do (add-hook
-                 hook
-                 (lambda ()
-                   (when capf (setq-local completion-at-point-functions capf))
-                   (when company (setq-local company-backends company)))))))
+    (dolist (mode modes)
+      (add-hook
+       (if (compdef--hook-p mode) mode
+         (derived-mode-hook-name mode))
+       (lambda ()
+         (when capf (setq-local completion-at-point-functions capf))
+         (when company (setq-local company-backends company)))))))
 
 (with-eval-after-load 'use-package-core
   (declare-function use-package-concat "use-package")
