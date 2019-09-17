@@ -82,27 +82,30 @@ can be quoted lists as well as atoms."
   (declare-function use-package-normalize-symlist "use-package")
   (defvar use-package-keywords)
 
-  (dolist (keyword compdef--use-package-keywords)
-    (setq use-package-keywords
-          (use-package-list-insert
-           keyword use-package-keywords :init))
-    (defalias
-      (intern (concat "use-package-normalize/" (symbol-name keyword)))
-      #'use-package-normalize-symlist))
-
   (defun use-package-handler/:compdef (name _keyword args rest state)
+    "Place target `compdef' modes into STATE."
     (use-package-process-keywords name rest
       (plist-put state :compdef args)))
 
   (defun compdef--use-package-handler (name keyword args rest state)
+    "Handle all `compdef' `use-package' keywords except :compdef."
     (use-package-concat
      (use-package-process-keywords name rest state)
      `((compdef
         :modes ',(or (plist-get state :compdef) name)
         ,keyword ',args))))
 
-  (defalias 'use-package-handler/:capf #'compdef--use-package-handler)
-  (defalias 'use-package-handler/:company #'compdef--use-package-handler))
+  (dolist (keyword compdef--use-package-keywords)
+    (setq use-package-keywords
+          (use-package-list-insert
+           keyword use-package-keywords :init))
+    (defalias
+      (intern (concat "use-package-normalize/" (symbol-name keyword)))
+      #'use-package-normalize-symlist)
+    (unless (eq keyword ':compdef)
+      (defalias
+        (intern (concat "use-package-handler/" (symbol-name keyword)))
+        #'compdef--use-package-handler))))
 
 (provide 'compdef)
 ;;; compdef.el ends here
