@@ -85,11 +85,10 @@ can be quoted lists as well as atoms."
   (dolist (keyword compdef--use-package-keywords)
     (setq use-package-keywords
           (use-package-list-insert
-           keyword use-package-keywords :init)))
-
-  (defalias 'use-package-normalize/:compdef #'use-package-normalize-symlist)
-  (defalias 'use-package-normalize/:capf #'use-package-normalize-symlist)
-  (defalias 'use-package-normalize/:company #'use-package-normalize-symlist)
+           keyword use-package-keywords :init))
+    (defalias
+      (intern (concat "use-package-normalize/" (symbol-name keyword)))
+      #'use-package-normalize-symlist))
 
   (defun use-package-handler/:compdef (name _keyword args rest state)
     (use-package-process-keywords name rest
