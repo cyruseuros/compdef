@@ -54,9 +54,9 @@
 
 (defun compdef--hook-p (symbol)
   "Check if SYMBOL is a hook."
-  (or
-   (string-suffix-p "-hook" (symbol-name symbol))
-   (string-suffix-p "-functions" (symbol-name symbol))))
+  (let ((symbol-name (symbol-name symbol)))
+    (or (string-suffix-p "-hook" symbol-name)
+        (string-suffix-p "-functions" symbol-name))))
 
 ;;;###autoload
 (cl-defun compdef (&key modes capf company)
