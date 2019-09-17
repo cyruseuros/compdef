@@ -96,16 +96,19 @@ can be quoted lists as well as atoms."
         ,keyword ',args))))
 
   (dolist (keyword compdef--use-package-keywords)
-    (setq use-package-keywords
-          (use-package-list-insert
-           keyword use-package-keywords :init))
-    (defalias
-      (intern (concat "use-package-normalize/" (symbol-name keyword)))
-      #'use-package-normalize-symlist)
-    (unless (eq keyword ':compdef)
+    (let ((keyword-name (symbol-name keyword)))
+      (setq use-package-keywords
+            (use-package-list-insert
+             keyword use-package-keywords :init))
+
       (defalias
-        (intern (concat "use-package-handler/" (symbol-name keyword)))
-        #'compdef--use-package-handler))))
+        (intern (concat "use-package-normalize/" keyword-name))
+        #'use-package-normalize-symlist)
+
+      (unless (eq keyword ':compdef)
+        (defalias
+          (intern (concat "use-package-handler/" keyword-name))
+          #'compdef--use-package-handler)))))
 
 (provide 'compdef)
 ;;; compdef.el ends here
