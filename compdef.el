@@ -88,8 +88,8 @@ can be quoted lists as well as atoms."
            keyword use-package-keywords :init)))
 
   (defalias 'use-package-normalize/:compdef #'use-package-normalize-symlist)
-  (defalias 'use-package-normalize/:company #'use-package-normalize-symlist)
   (defalias 'use-package-normalize/:capf #'use-package-normalize-symlist)
+  (defalias 'use-package-normalize/:company #'use-package-normalize-symlist)
 
   (defun use-package-handler/:compdef (name _keyword args rest state)
     (use-package-process-keywords name rest
