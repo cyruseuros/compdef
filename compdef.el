@@ -1,4 +1,4 @@
-;;; compdef.el --- A stupid completion definer. -*- lexical-binding: t; -*-
+;;; compdef.el --- A local completion definer. -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2019 Uros Perisic
 
@@ -26,7 +26,7 @@
 ;; This file is not part of Emacs.
 
 ;;; Commentary:
-;; A stupid completion definer.
+;; A local completion definer.
 
 ;; We keep reinventing the wheel on how to set local completion
 ;; backends.  `compdef' does this for both CAPF and company
@@ -42,6 +42,11 @@
 (require 'cl-lib)
 (require 'derived)
 (defvar company-backends)
+(defvar use-package-keywords)
+(declare-function use-package-concat "ext:use-package-core")
+(declare-function use-package-list-insert "ext:use-package-core")
+(declare-function use-package-process-keywords "ext:use-package-core")
+(declare-function use-package-normalize-symlist "ext:use-package-core")
 
 (defvar compdef--use-package-keywords
   '(:compdef :capf :company)
@@ -76,24 +81,21 @@ can be quoted lists as well as atoms."
          (when capf (setq-local completion-at-point-functions capf))
          (when company (setq-local company-backends company)))))))
 
-(with-eval-after-load 'use-package-core
-  (declare-function use-package-concat "ext:use-package-core")
-  (declare-function use-package-process-keywords "ext:use-package-core")
-  (declare-function use-package-normalize-symlist "ext:use-package-core")
-  (defvar use-package-keywords)
+(defun compdef--use-package-handler (name keyword args rest state)
+  "Handle each `compdef' `use-package' keyword for package NAME.
+This function should not be called with KEYWORD :compdef. Pass
+ARGS to KEYWORD. Leave REST and STATE unmodified."
+  (use-package-concat
+   (use-package-process-keywords name rest state)
+   `((compdef
+      :modes ',(or (plist-get state :compdef) name)
+      ,keyword ',args))))
 
+(with-eval-after-load 'use-package-core
   (defun use-package-handler/:compdef (name _keyword args rest state)
     "Place target `compdef' modes into STATE."
     (use-package-process-keywords name rest
       (plist-put state :compdef args)))
-
-  (defun compdef--use-package-handler (name keyword args rest state)
-    "Handle all `compdef' `use-package' keywords except :compdef."
-    (use-package-concat
-     (use-package-process-keywords name rest state)
-     `((compdef
-        :modes ',(or (plist-get state :compdef) name)
-        ,keyword ',args))))
 
   (dolist (keyword compdef--use-package-keywords)
     (let ((keyword-name (symbol-name keyword)))
