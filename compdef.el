@@ -82,14 +82,15 @@ can be quoted lists as well as atoms."
          (when company (setq-local company-backends company)))))))
 
 (defun use-package-handler/:compdef (name _keyword args rest state)
-  "Place target `compdef' modes into STATE."
+  "Place target `compdef' :mode ARGS into STATE for keyword.
+Pass NAME and REST to `use-package-process-keywords'."
   (use-package-process-keywords name rest
     (plist-put state :compdef args)))
 
 (defun compdef--use-package-handler (name keyword args rest state)
   "Handle each `compdef' `use-package' keyword for package NAME.
-This function should not be called with KEYWORD :compdef. Pass
-ARGS to KEYWORD. Leave REST and STATE unmodified."
+This function should not be called with KEYWORD :compdef.  Pass
+ARGS to KEYWORD.  Leave REST and STATE unmodified."
   (use-package-concat
    (use-package-process-keywords name rest state)
    `((compdef
