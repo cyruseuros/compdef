@@ -35,7 +35,7 @@
 ;; stupid.  I've seen some really powerful solutions to this problem,
 ;; but they all seem to assume a certain approach to configuring
 ;; completions and are thus usually embedded in a starter kit like
-;; Doom Emacs, Spacemacs... `compdef' isn't that clever. It just
+;; Doom Emacs, Spacemacs...  `compdef' isn't that clever. It just
 ;; works.
 
 ;;; Code:
@@ -81,6 +81,11 @@ can be quoted lists as well as atoms."
          (when capf (setq-local completion-at-point-functions capf))
          (when company (setq-local company-backends company)))))))
 
+(defun use-package-handler/:compdef (name _keyword args rest state)
+  "Place target `compdef' modes into STATE."
+  (use-package-process-keywords name rest
+    (plist-put state :compdef args)))
+
 (defun compdef--use-package-handler (name keyword args rest state)
   "Handle each `compdef' `use-package' keyword for package NAME.
 This function should not be called with KEYWORD :compdef. Pass
@@ -92,21 +97,17 @@ ARGS to KEYWORD. Leave REST and STATE unmodified."
       ,keyword ',args))))
 
 (with-eval-after-load 'use-package-core
-  (defun use-package-handler/:compdef (name _keyword args rest state)
-    "Place target `compdef' modes into STATE."
-    (use-package-process-keywords name rest
-      (plist-put state :compdef args)))
-
   (dolist (keyword compdef--use-package-keywords)
     (let ((keyword-name (symbol-name keyword)))
+      ;; extend `use-package' keywords
       (setq use-package-keywords
             (use-package-list-insert
              keyword use-package-keywords :init))
-
+      ;; define normalizers
       (defalias
         (intern (concat "use-package-normalize/" keyword-name))
         #'use-package-normalize-symlist)
-
+      ;; define handlers
       (unless (eq keyword ':compdef)
         (defalias
           (intern (concat "use-package-handler/" keyword-name))
