@@ -13,7 +13,7 @@ by default. It gathers the completion data from =completion-at-point-functions=
 (=capf= for short).
 
 [[https://github.com/company-mode/company-mode][Company]] --- a popular external package with
-similar functonality --- uses =company-backends= to configure sources for
+similar functionality --- uses =company-backends= to configure sources for
 completion data. Because company is designed to work with =capf= you can make
 use of it by adding the =company-capf= backend to =company-backends=.
 
