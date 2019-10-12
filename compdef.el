@@ -68,8 +68,10 @@
   "Set local completion backends for MODES.
 Infer hooks for MODES. If actual hooks are passed use them
 directly. Set `company-backends' to COMPANY if not nil. Set
-`completion-at-point-functions' to CAPF if not nil. All arguments
-can be quoted lists as well as atoms."
+`completion-at-point-functions' to CAPF if not nil. If
+`major-mode' or its hook are in MODES, do so immediately. All
+arguments can be quoted lists as well as atoms."
+  ;; TODO: Implement interactive calls.
   (let ((capf (compdef--enlist capf))
         (company (compdef--enlist company))
         (modes (compdef--enlist modes))
@@ -78,7 +80,9 @@ can be quoted lists as well as atoms."
             (when capf (setq-local completion-at-point-functions capf))
             (when company (setq-local company-backends company)))))
     (dolist (mode modes)
-      (when (eq major-mode mode)
+      (when (or (eq major-mode mode)
+                (eq (derived-mode-hook-name
+                     major-mode) mode))
         (funcall lambda))
       (add-hook
        (if (compdef--hook-p mode) mode
