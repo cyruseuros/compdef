@@ -64,7 +64,7 @@
         (string-suffix-p "-functions" symbol-name))))
 
 ;;;###autoload
-(cl-defun compdef (&key modes capf company)
+(cl-defun compdef (&key modes minor-modes capf company)
   "Set local completion backends for MODES.
 Infer hooks for MODES. If actual hooks are passed use them
 directly. Set `company-backends' to COMPANY if not nil. Set
@@ -74,6 +74,7 @@ arguments can be quoted lists as well as atoms."
   ;; TODO: Implement interactive calls.
   (let ((capf (compdef--enlist capf))
         (company (compdef--enlist company))
+        (minor-modes (compdef--enlist minor-modes))
         (hooks
          (cl-loop
           for mode in (compdef--enlist modes)
@@ -81,8 +82,9 @@ arguments can be quoted lists as well as atoms."
                     (derived-mode-hook-name mode))))
         (lambda
           (lambda ()
-            (when capf (setq-local completion-at-point-functions capf))
-            (when company (setq-local company-backends company)))))
+            (when (cl-every #'symbol-value minor-modes)
+              (when capf (setq-local completion-at-point-functions capf))
+              (when company (setq-local company-backends company))))))
     (dolist (hook hooks)
       (add-hook hook lambda)
       (when (eq (derived-mode-hook-name
