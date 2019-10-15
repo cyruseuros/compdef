@@ -72,23 +72,22 @@ directly. Set `company-backends' to COMPANY if not nil. Set
 `major-mode' or its hook are in MODES, do so immediately. All
 arguments can be quoted lists as well as atoms."
   ;; TODO: Implement interactive calls.
-  (let* ((capf (compdef--enlist capf))
-         (company (compdef--enlist company))
-         (modes (compdef--enlist modes))
-         (hooks (cl-loop
-                 for mode in modes
-                 as hook = (if (compdef--hook-p mode) mode
-                             (derived-mode-hook-name mode))
-                 collect hook))
-         (lambda
-           (lambda ()
-             (when capf (setq-local completion-at-point-functions capf))
-             (when company (setq-local company-backends company)))))
+  (let ((capf (compdef--enlist capf))
+        (company (compdef--enlist company))
+        (hooks
+         (cl-loop
+          for mode in (compdef--enlist modes)
+          collect (if (compdef--hook-p mode) mode
+                    (derived-mode-hook-name mode))))
+        (lambda
+          (lambda ()
+            (when capf (setq-local completion-at-point-functions capf))
+            (when company (setq-local company-backends company)))))
     (dolist (hook hooks)
+      (add-hook hook lambda)
       (when (eq (derived-mode-hook-name
                  major-mode) hook)
-        (funcall lambda))
-      (add-hook hook lambda))))
+        (funcall lambda)))))
 
 (defun use-package-handler/:compdef (name _keyword args rest state)
   "Place target `compdef' :mode ARGS into STATE for keyword.
