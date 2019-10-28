@@ -107,7 +107,7 @@ ARGS to KEYWORD.  Leave REST and STATE unmodified."
       ;; define normalizers
       (defalias
         (intern (concat "use-package-normalize/" keyword-name))
-        #'use-package-normalize-symlist)
+        #'use-package-normalize-recursive-symlist)
       ;; define handlers
       (unless (eq keyword ':compdef)
         (defalias
