@@ -74,12 +74,15 @@ can be quoted lists as well as atoms."
         (company (compdef--enlist company))
         (modes (compdef--enlist modes)))
     (dolist (mode modes)
-      (add-hook
-       (if (compdef--hook-p mode) mode
-         (derived-mode-hook-name mode))
-       (lambda ()
-         (when capf (setq-local completion-at-point-functions capf))
-         (when company (setq-local company-backends company)))))))
+      (let* ((hook (if (compdef--hook-p mode)
+                       mode
+                     (derived-mode-hook-name mode)))
+             (fn-name (intern (concat "compdef-setup-" (symbol-name hook)))))
+        (fset fn-name
+              (lambda ()
+                (when capf (setq-local completion-at-point-functions capf))
+                (when company (setq-local company-backends company))))
+        (add-hook hook fn-name)))))
 
 (defun use-package-handler/:compdef (name _keyword args rest state)
   "Place target `compdef' :mode ARGS into STATE for keyword.
@@ -107,7 +110,7 @@ ARGS to KEYWORD.  Leave REST and STATE unmodified."
       ;; define normalizers
       (defalias
         (intern (concat "use-package-normalize/" keyword-name))
-        #'use-package-normalize-symlist)
+        #'use-package-normalize-recursive-symlist)
       ;; define handlers
       (unless (eq keyword ':compdef)
         (defalias
