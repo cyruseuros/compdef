@@ -72,19 +72,19 @@ directly. Set `company-backends' to COMPANY if not nil. Set
 `major-mode' or its hook are in MODES, do so immediately. All
 arguments can be quoted lists as well as atoms."
   ;; TODO: Implement interactive calls.
-  (let ((capf (compdef--enlist capf))
-        (company (compdef--enlist company))
-        (minor-modes (compdef--enlist minor-modes))
-        (hooks
-         (cl-loop
-          for mode in (compdef--enlist modes)
-          collect (if (compdef--hook-p mode) mode
-                    (derived-mode-hook-name mode))))
-        (lambda
-          (lambda ()
-            (when (cl-every #'symbol-value minor-modes)
-              (when capf (setq-local completion-at-point-functions capf))
-              (when company (setq-local company-backends company))))))
+  (let* ((capf (compdef--enlist capf))
+         (company (compdef--enlist company))
+         (minor-modes (compdef--enlist minor-modes))
+         (hooks
+          (cl-loop
+           for mode in (compdef--enlist modes)
+           collect (if (compdef--hook-p mode) mode
+                     (derived-mode-hook-name mode))))
+         (lambda
+           (lambda ()
+             (when (cl-every #'symbol-value minor-modes)
+               (when capf (setq-local completion-at-point-functions capf))
+               (when company (setq-local company-backends company))))))
     (dolist (hook hooks)
       (add-hook hook lambda)
       (when (eq (derived-mode-hook-name
