@@ -63,6 +63,19 @@
     (or (string-suffix-p "-hook" symbol-name)
         (string-suffix-p "-functions" symbol-name))))
 
+(defun compdef--set-function (name hook var value)
+  (when value
+    (let ((func (intern (format "compdef-setup-%s-%s"
+                                name (symbol-name hook)))))
+      (fset func
+            (lambda ()
+              (make-variable-buffer-local var)
+              (set var (compdef--enlist value))))
+      (add-hook hook func)
+      (when (eq (derived-mode-hook-name major-mode)
+                hook)
+        (funcall func)))))
+
 ;;;###autoload
 (cl-defun compdef (&key modes minor-modes capf company)
   "Set local completion backends for MODES.
@@ -72,24 +85,16 @@ directly. Set `company-backends' to COMPANY if not nil. Set
 `major-mode' or its hook are in MODES, do so immediately. All
 arguments can be quoted lists as well as atoms."
   ;; TODO: Implement interactive calls.
-  (let* ((capf (compdef--enlist capf))
-         (company (compdef--enlist company))
-         (minor-modes (compdef--enlist minor-modes))
+  (let* ((minor-modes (compdef--enlist minor-modes))
          (hooks
-          (cl-loop
-           for mode in (compdef--enlist modes)
-           collect (if (compdef--hook-p mode) mode
-                     (derived-mode-hook-name mode))))
-         (lambda
-           (lambda ()
-             (when (cl-every #'symbol-value minor-modes)
-               (when capf (setq-local completion-at-point-functions capf))
-               (when company (setq-local company-backends company))))))
-    (dolist (hook hooks)
-      (add-hook hook lambda)
-      (when (eq (derived-mode-hook-name
-                 major-mode) hook)
-        (funcall lambda)))))
+          (cl-loop for mode in (compdef--enlist modes)
+                   collect (if (compdef--hook-p mode)
+                               mode
+                             (derived-mode-hook-name mode)))))
+    (when (cl-every #'symbol-value minor-modes)
+      (dolist (hook hooks)
+        (compdef--set-function "capf" hook 'completion-at-point-functions capf)
+        (compdef--set-function "company" hook 'company-backends company)))))
 
 (defun use-package-handler/:compdef (name _keyword args rest state)
   "Place target `compdef' :mode ARGS into STATE for keyword.
