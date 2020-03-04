@@ -1,4 +1,4 @@
-;;; compdef.el --- A local completion definer. -*- lexical-binding: t; -*-
+;;; compdef.el --- A local completion definer -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2019 Uros Perisic
 
@@ -64,6 +64,9 @@
         (string-suffix-p "-functions" symbol-name))))
 
 (defun compdef--set-function (name hook var value)
+  "Add compdef configuration function to HOOK.
+Name it appropriately using NAME. Set VAR to VALUE in it. If
+called from the right major mode, call the function immediately."
   (when value
     (let ((func (intern (format "compdef-setup-%s-%s"
                                 name (symbol-name hook)))))
